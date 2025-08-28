@@ -1,7 +1,6 @@
 flask
 ultralytics
 opencv-python
-pytube
 torch
 torchvision
 yt-dlp

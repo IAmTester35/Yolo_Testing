@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Video với YOLO</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 90%; max-width: 1600px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #444; text-align: center; }
+        .form-container { margin-bottom: 30px; text-align: center; }
+        input[type="url"] { width: 70%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        .video-container { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; }
+        .video-wrapper { flex: 1; min-width: 320px; max-width: 800px; text-align: center; }
+        img { width: 100%; height: auto; border: 2px solid #ddd; border-radius: 4px; background-color: #000; } /* Dùng img thay cho video */
+        h3 { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Streaming và xử lý Video bằng YOLO</h1>
+        
+        <div class="form-container">
+            <!-- Form sẽ submit và tải lại trang với video_url trong địa chỉ -->
+            <form action="{{ url_for('index') }}" method="get">
+                <label for="video_url"><b>Nhập link video YouTube:</b></label><br><br>
+                <input type="url" id="video_url" name="video_url" placeholder="https://www.youtube.com/watch?v=..." required>
+                <button type="submit">Bắt đầu Stream</button>
+            </form>
+        </div>
+        
+        <!-- Khu vực hiển thị video -->
+        {% if video_url %}
+        <div class="video-container">
+            <div class="video-wrapper">
+                <h3>Video Gốc (Streaming)</h3>
+                <img src="{{ url_for('original_video_feed', url=video_url) }}" alt="Original Video Stream">
+            </div>
+            <div class="video-wrapper">
+                <h3>Video đã xử lý (YOLO Streaming)</h3>
+                <img src="{{ url_for('processed_video_feed', url=video_url) }}" alt="Processed Video Stream">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

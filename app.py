@@ -9,7 +9,7 @@ from collections import defaultdict
 app = Flask(__name__)
 
 try:
-    model = YOLO('yolo11n.pt')
+    model = YOLO('yolov8n.pt')
     print("Tải model YOLO thành công!")
 except Exception as e:
     print(f"Lỗi khi tải model YOLO: {e}")

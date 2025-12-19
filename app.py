@@ -5,8 +5,14 @@ from flask import Flask, render_template, request, Response
 from ultralytics import YOLO
 import yt_dlp
 from collections import defaultdict
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['RESULT_FOLDER'] = 'static/results'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 
 try:
     model = YOLO('yolov8n.pt')
@@ -43,7 +49,12 @@ def video_processing_thread(youtube_url):
             return
 
         frame_cache[youtube_url]['processing'] = True
-        stream_url = get_youtube_stream_url(youtube_url)
+        
+        if os.path.exists(youtube_url):
+             stream_url = youtube_url
+        else:
+             stream_url = get_youtube_stream_url(youtube_url)
+
         if not stream_url:
             frame_cache[youtube_url]['processing'] = False
             return
@@ -112,7 +123,38 @@ def generate_frames(youtube_url):
         client_counts[youtube_url] -= 1
         print(f"Client đã ngắt kết nối khỏi {youtube_url}. Số client còn lại: {client_counts[youtube_url]}")
 
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return "No file part", 400
+    file = request.files['file']
+    if file.filename == '':
+        return "No selected file", 400
+    
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
 
+    # Check extension
+    ext = filename.rsplit('.', 1)[1].lower()
+    
+    if ext in ['jpg', 'jpeg', 'png', 'bmp', 'webp']:
+        # Image processing
+        try:
+            results = model(filepath)
+            annotated_frame = results[0].plot()
+            result_filename = f"processed_{filename}"
+            result_path = os.path.join(app.config['RESULT_FOLDER'], result_filename)
+            cv2.imwrite(result_path, annotated_frame)
+            return render_template('index.html', image_result=result_path)
+        except Exception as e:
+            return f"Error processing image: {e}", 500
+
+    elif ext in ['mp4', 'avi', 'mov', 'mkv']:
+        # Video processing (stream)
+        return render_template('index.html', video_url=filepath)
+    
+    return "Unsupported file type", 400
 @app.route('/')
 def index():
     video_url = request.args.get('video_url')

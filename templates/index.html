@@ -29,12 +29,29 @@
                 <button type="submit">Bắt đầu Stream</button>
             </form>
         </div>
+
+        <div class="form-container">
+            <h3>Hoặc upload file để test (Ảnh/Video)</h3>
+            <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" accept="image/*,video/*" required>
+                <button type="submit">Upload</button>
+            </form>
+        </div>
         
         {% if video_url %}
         <div class="video-container">
             <div class="video-wrapper">
                 <h3>Video đã xử lý (YOLO Streaming)</h3>
                 <img src="{{ url_for('video_feed', url=video_url) }}" alt="Processed Video Stream">
+            </div>
+        </div>
+        {% endif %}
+
+        {% if image_result %}
+        <div class="video-container">
+            <div class="video-wrapper">
+                <h3>Ảnh đã xử lý (YOLO Detection)</h3>
+                <img src="{{ image_result }}" alt="Processed Image Result">
             </div>
         </div>
         {% endif %}
